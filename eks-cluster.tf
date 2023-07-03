@@ -6,7 +6,7 @@ resource "aws_eks_cluster" "EKS_POC_PROJECT_vpc" {
 
   vpc_config {
     # security_group_ids      = [aws_security_group.eks_cluster.id, aws_security_group.eks_nodes.id]
-    subnet_ids              = [aws_subnet.AZ1_public.id, aws_subnet.AZ1_private.id]
+    subnet_ids              = [aws_subnet.AZ1_private.id, aws_subnet.AZ2_private.id]
     endpoint_private_access = true
     endpoint_public_access  = true
     public_access_cidrs     = ["0.0.0.0/0"]

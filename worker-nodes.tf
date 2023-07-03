@@ -3,7 +3,7 @@ resource "aws_eks_node_group" "EKS_POC_PROJECT_vpc" {
   cluster_name    = aws_eks_cluster.EKS_POC_PROJECT_vpc.name
   node_group_name = var.project
   node_role_arn   = aws_iam_role.node.arn
-  subnet_ids      = [aws_subnet.AZ1_public.id, aws_subnet.AZ1_private.id]
+  subnet_ids      = [aws_subnet.AZ1_private.id, aws_subnet.AZ2_private.id]
 
   scaling_config {
     desired_size = 2

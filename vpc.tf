@@ -7,21 +7,21 @@ resource "aws_vpc" "EKS_POC_PROJECT_vpc" {
   }
 }
 
-# Public Subnets
-resource "aws_subnet" "AZ1_public" {
+# Private Subnets
+resource "aws_subnet" "AZ1_private" {
   vpc_id            = aws_vpc.EKS_POC_PROJECT_vpc.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = "us-east-2a"
 
   tags = {
-    Name = "${var.project}-public-sg"
+    Name = "${var.project}-private-sg"
   }
 
   map_public_ip_on_launch = true
 }
 
 # Private Subnets
-resource "aws_subnet" "AZ1_private" {
+resource "aws_subnet" "AZ2_private" {
   vpc_id            = aws_vpc.EKS_POC_PROJECT_vpc.id
   cidr_block        = "10.0.3.0/24"
   availability_zone = "us-east-2b"
@@ -59,7 +59,7 @@ resource "aws_route_table" "main" {
 
 # Route table and subnet associations
 resource "aws_route_table_association" "internet_access" {
-  subnet_id      = aws_subnet.AZ1_public.id 
+  subnet_id      = aws_subnet.AZ1_private.id 
   route_table_id = aws_route_table.main.id
 }
 
@@ -75,7 +75,7 @@ resource "aws_eip" "main" {
 # NAT Gateway
 resource "aws_nat_gateway" "main" {
   allocation_id = aws_eip.main.id
-  subnet_id     = aws_subnet.AZ1_public.id
+  subnet_id     = aws_subnet.AZ1_private.id
   tags = {
     Name = "${var.project}-ngw"
   }
@@ -86,44 +86,6 @@ resource "aws_route" "main" {
   route_table_id         = aws_vpc.EKS_POC_PROJECT_vpc.default_route_table_id
   nat_gateway_id         = aws_nat_gateway.main.id
   destination_cidr_block = "0.0.0.0/0"
-}
-
-# Security group for public subnet
-resource "aws_security_group" "public_sg" {
-  name   =  "${var.project}-Public-sg"
-  vpc_id = aws_vpc.EKS_POC_PROJECT_vpc.id
-
-  tags = {
-    Name = "${var.project}-Public-sg"
-  }
-}
-
-# Security group traffic rules
-resource "aws_security_group_rule" "sg_ingress_public_443" {
-  security_group_id = aws_security_group.public_sg.id
-  type              = "ingress"
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-}
-
-resource "aws_security_group_rule" "sg_ingress_public_80" {
-  security_group_id = aws_security_group.public_sg.id
-  type              = "ingress"
-  from_port         = 80
-  to_port           = 80
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-}
-
-resource "aws_security_group_rule" "sg_egress_public" {
-  security_group_id = aws_security_group.public_sg.id
-  type              = "egress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
 }
 
 # Security group for data plane
