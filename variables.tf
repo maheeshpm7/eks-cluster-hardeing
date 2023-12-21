@@ -34,3 +34,5 @@ variable "tags" {
     "Project"     = "TerraformEKSWorkshop"
   }
 }
+
+wooode 
